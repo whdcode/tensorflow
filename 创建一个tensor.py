@@ -141,3 +141,102 @@ print(net10)
    dim = 4tensor: 卷积神经网络
    dim = 5tensor: meta-learning 元学习
 """
+
+"""索引方式"""
+
+# 基础索引
+a = tf.ones([2, 3, 4, 5])
+print(a[1][2])
+
+# 基于numpy的索引
+b = tf.random.normal([2, 3, 4, 5])
+b1 = a[1, 2].shape
+print(b1)   # 返回b1的形状
+
+# 基于start: end
+c = tf.range(10)   # 一维数组c
+print(c[-1:])   # 返回包含c数组最后一个元素的数组
+print(c[:-1])   # 返回第一到倒数第二个元素组成的数组
+
+# 基于start:end:step给定步长
+
+a = tf.ones([3, 4, 5, 6])
+a1 = a[:, 0:4:2, 0:5:3, 2].shape
+print(a1)
+
+# 基于::end,可以实现倒序
+d = tf.range(5)   # <tf.Tensor: shape=(5,), dtype=int32, numpy=array([0, 1, 2, 3, 4])>
+d1 = d[::-1]    # <tf.Tensor: shape=(5,), dtype=int32, numpy=array([4, 3, 2, 1, 0])>
+d2 = d[2::-2]   # <tf.Tensor: shape=(2,), dtype=int32, numpy=array([2, 0])>先采索引2，再反着
+d3 = tf.range(10)   # <tf.Tensor: shape=(10,), dtype=int32, numpy=array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])>
+print(d3[:3:-1])    # <tf.Tensor: shape=(6,), dtype=int32, numpy=array([9, 8, 7, 6, 5, 4])>
+
+
+"""...代替任意:,前提是...可以推理出:的个数"""
+e = tf.random.normal([2, 3, 5, 6, 7])
+e1 = e[0, :, :, :, :].shape
+print(e1)
+e2 = e[0, ...].shape
+print(e2)
+# e2 = e1， e[0, :, :, :, :]等价于e[0, ...]
+
+# 同理e3 = e4
+e3 = e[:, :, :, :, 0].shape
+e4 = e[..., 0].shape
+print(e3, e4)
+# e5 = e6
+e5 = e[0, ..., 2].shape
+e6 = e[0, :, :, :, 2].shape
+print(e5, e6)
+
+"""
+Selective Indexing  选择性的索引
+▪ tf.gather
+▪ tf.gather_nd
+▪ tf.boolean_mask
+"""
+
+# 1、tf.gather
+# f = tf.gather(目标对象, axis=维度, indics=[索引列表])      自由采样，按照所给索引列表对对象给定维度上进行取值
+f = tf.ones([4, 35, 8])
+f1 = tf.gather(f, axis=0, indices=[2, 3]).shape
+f2 = tf.gather(f, axis=1, indices=[3, 1, 2, 6]).shape
+print(f1, f2)
+
+# 2、tf.gather_nd(目标数组对象， [[目标对象1索引列表]， [目标对象2索引列表], ...[目标对象n索引列表]]，共计取了数组中的n个对象
+# 如果只取一个对象，那么可以省略最外层[],例如以下：
+
+g = tf.gather_nd(f, [0]).shape  # 理解时其中的[0]外加[],即理解成[[0]]
+g1 = tf.gather_nd(f, [0, 1]).shape  # 理解时其中的[0, 1]外加[],即理解成[[0, 1]]
+g2 = tf.gather_nd(f, [0, 1, 2]).shape   # 理解时其中的[0, 1, 2]外加[],即理解成[[0, 1, 2]]，返回tensor为标量
+
+g3 = tf.gather_nd(f, [[0, 1, 2]]).shape   # 因理解成[[[0, 1, 2]]]最终为一数组而不是标量
+print(g)
+print(g1)
+print(g2)
+print(g3)
+
+# 如果取多个对象，不可以忽略外层[]
+
+g4 = tf.gather_nd(f, [[0, 0], [1, 1]]).shape    # 取两个对象
+g5 = tf.gather_nd(f, [[0, 0], [1, 1], [2, 2]]).shape
+g6 = tf.gather_nd(f, [[0, 0, 0], [1, 1, 1], [2, 2, 2]]).shape
+
+g7 = tf.gather_nd(f, [[[0, 0], [1, 1], [2, 2]]]).shape  # 外加一[]，提升维度
+print(g4)
+print(g5)
+print(g6)
+print(g7)
+
+# 3、tf.boolean_mask ,布尔型任意取索引
+# h = tf.boolean_mask(数组对象， mask=[目标维度布尔列表]， axis=目标取维度,默认为0).shape
+h = tf.ones([4, 28, 28, 3])
+h1 = tf.boolean_mask(h, mask=[True, True, False, False]).shape  # m默认axis=0
+h2 = tf.boolean_mask(h, mask=[True, True, False], axis=3).shape
+print(h1)
+print(h2)
+
+h3 = tf.ones([2, 3, 4])     # 假设有两张图片，每张图片为三行四列
+# tf.boolean_mask(h3, mask=[[第一张图片的行布尔取值列表], [第二张图片的行布尔取值列表])
+h4 = tf.boolean_mask(h3, mask=[[True, False, False], [False, True, True]])  # True的数目为3，取得三行，每行4列，故shape = (3, 4)
+print(h4)
