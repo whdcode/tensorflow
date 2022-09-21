@@ -1,6 +1,7 @@
 """创建tensor"""
 import keras.layers
 
+
 """创建tensor的方式有：
 ▪ from numpy, list
 ▪ zeros, ones
