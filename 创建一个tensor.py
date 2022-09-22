@@ -212,7 +212,7 @@ g1 = tf.gather_nd(f, [0, 1]).shape  # 理解时其中的[0, 1]外加[],即理解
 g2 = tf.gather_nd(f, [0, 1, 2]).shape   # 理解时其中的[0, 1, 2]外加[],即理解成[[0, 1, 2]]，返回tensor为标量
 
 g3 = tf.gather_nd(f, [[0, 1, 2]]).shape   # 因理解成[[[0, 1, 2]]]最终为一数组而不是标量
-print(g)
+print("g", g)
 print(g1)
 print(g2)
 print(g3)
